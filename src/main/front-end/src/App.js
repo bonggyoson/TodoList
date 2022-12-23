@@ -1,19 +1,50 @@
-import React, {useEffect, useState} from 'react';
-import axios from 'axios';
+import React, {useCallback, useRef, useState} from 'react';
+import TodoTemplate from "./components/TodoTemplate";
+import TodoList from "./components/TodoList";
+import TodoInsert from "./components/TodoInsert";
 
 const App = () => {
-    const [hello, setHello] = useState('')
+    const [todos, setTodos] = useState([
+        {
+            id     : 1,
+            text   : '리액트의 기초 알아보기',
+            checked: true,
+        },
+        {
+            id     : 2,
+            text   : 'JPA의 기초 알아보기',
+            checked: true,
+        },
+        {
+            id     : 3,
+            text   : '젠킨스의 기초 알아보기',
+            checked: true,
+        },
+    ]);
 
-    useEffect(() => {
-        axios.get('/api/hello')
-            .then(response => setHello(response.data))
-            .catch(error => console.log(error))
-    }, []);
+    const nextId = useRef(4);
+
+    const onInsert = useCallback(
+        (text) => {
+            const todo = {
+                id     : nextId.current,
+                text,
+                checked: false,
+            };
+            setTodos(todos.concat(todo));
+            nextId.current += 1;
+        }, [todos]
+    );
+
+    const onRemove = useCallback((id) => {
+        setTodos(todos.filter((todo) => todo.id !== id));
+    }, [todos]);
 
     return (
-        <div>
-            백엔드에서 가져온 데이터입니다 : {hello}
-        </div>
+        <TodoTemplate>
+            <TodoInsert onInsert={onInsert}/>
+            <TodoList todos={todos} onRemove={onRemove}/>
+        </TodoTemplate>
     );
 }
 
